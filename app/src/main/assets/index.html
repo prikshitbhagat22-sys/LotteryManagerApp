@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lottery Manager — Secure</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1a2e}
+.login-card{background:#fff;border-radius:14px;padding:36px 32px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+.login-logo{text-align:center;font-size:28px;margin-bottom:6px}
+.login-title{text-align:center;font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+.login-sub{text-align:center;font-size:12px;color:#aaa;margin-bottom:24px}
+.login-card label{font-size:13px;color:#555;font-weight:600;display:block;margin-bottom:5px;margin-top:14px}
+.login-card input{width:100%;height:40px;border:1.5px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;outline:none;transition:border 0.2s}
+.login-card input:focus{border-color:#e94560}
+.login-btn{width:100%;margin-top:20px;padding:11px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.login-btn:hover{opacity:0.85}
+.login-err{color:#e94560;font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+.login-hint{font-size:11px;color:#bbb;text-align:center;margin-top:12px}
+
+/* APP */
+#appScreen{display:none}
+.topbar{background:#1a1a2e;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px}
+.topbar-title{font-size:17px;font-weight:700}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-clock{font-size:12px;opacity:0.6}
+.logout-btn{font-size:12px;padding:5px 12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;cursor:pointer}
+.logout-btn:hover{background:rgba(255,255,255,0.2)}
+
+.tabs{display:flex;background:#16213e}
+.tab{flex:1;padding:11px 0;font-size:13px;font-weight:600;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,0.5);transition:all 0.2s;border-bottom:3px solid transparent}
+.tab.active{color:#fff;border-bottom-color:#e94560}
+.tab:hover{color:#fff}
+
+.content{max-width:700px;margin:0 auto;padding:20px 16px}
+.sec{display:none}.sec.active{display:block}
+
+.card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid #e8e8e8}
+.card-title{font-size:12px;font-weight:700;color:#888;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+
+label{font-size:13px;color:#555;font-weight:600;display:block;margin-bottom:5px}
+select,input[type=text],input[type=number]{height:38px;border-radius:7px;border:1.5px solid #ddd;background:#fafafa;color:#222;font-size:14px;padding:0 10px;width:100%;outline:none;transition:border 0.2s}
+select:focus,input:focus{border-color:#e94560;background:#fff}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.erow{display:grid;grid-template-columns:95px 1fr 32px;gap:8px;align-items:center;margin-bottom:8px}
+.erow input[type=number]{text-align:center}
+.rbtn{width:30px;height:30px;border-radius:50%;border:1px solid #ddd;background:#f5f5f5;color:#999;cursor:pointer;font-size:18px;line-height:1}
+.rbtn:hover{background:#ffe0e0;color:#e94560;border-color:#e94560}
+.addbtn{font-size:13px;color:#1976d2;background:none;border:none;cursor:pointer;margin-top:4px}
+.addbtn:hover{text-decoration:underline}
+
+.totalbar{display:flex;justify-content:space-between;align-items:center;background:#1a1a2e;color:#fff;border-radius:8px;padding:12px 18px;margin-bottom:14px}
+.totalamt{font-size:24px;font-weight:700}
+
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.btn{padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #ddd;background:#fff;color:#333;transition:all 0.15s}
+.btn:hover{background:#f5f5f5}
+.btn-primary{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.btn-primary:hover{opacity:0.85}
+.btn-green{background:#2e7d32;color:#fff;border-color:#2e7d32}
+.btn-green:hover{opacity:0.85}
+.btn-blue{background:#1565c0;color:#fff;border-color:#1565c0}
+.btn-blue:hover{opacity:0.85}
+.btn-wa{background:#25D366;color:#fff;border-color:#25D366}
+.btn-wa:hover{opacity:0.85}
+.btn-red{background:#e94560;color:#fff;border-color:#e94560}
+.btn-red:hover{opacity:0.85}
+.btn-orange{background:#e65100;color:#fff;border-color:#e65100}
+.btn-orange:hover{opacity:0.85}
+
+.slip-box{border:1px solid #ddd;border-radius:10px;padding:16px;margin-top:16px;background:#fff}
+.win-result{border-radius:10px;padding:14px;margin-top:12px}
+.win-found{background:#e8f5e9;border:1px solid #a5d6a7}
+.win-none{background:#fff3e0;border:1px solid #ffcc80}
+.win-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.07);font-size:13px}
+.win-row:last-child{border-bottom:none}
+.hist-item{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:11px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.15s}
+.hist-item:hover{background:#f5f5f5}
+.hist-group{background:#eef1f8;border:1px solid #dde2f0;border-radius:10px;padding:12px;margin-bottom:16px}
+.hist-group-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.hist-group-date{font-size:16px;font-weight:700;color:#1a1a2e}
+.hist-group-range{font-size:11px;color:#888;margin-top:2px}
+.hist-group-total{font-size:18px;font-weight:700;color:#2e7d32;background:#fff;border-radius:8px;padding:6px 12px;border:1px solid #c8e6c9}
+.hist-group-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.hist-group-btns .btn{font-size:12px;padding:7px 12px}
+.hist-group-entries{display:flex;flex-direction:column;gap:8px}
+.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;background:#e3f2fd;color:#1565c0;margin-left:6px;font-weight:600}
+.empty{text-align:center;color:#bbb;padding:2rem;font-size:13px}
+.colheader{display:grid;grid-template-columns:95px 1fr 32px;gap:8px;margin-bottom:4px}
+.colheader span{font-size:11px;color:#999;font-weight:600;text-transform:uppercase}
+
+.file-section{background:#f8f9ff;border:1.5px dashed #c5cae9;border-radius:10px;padding:16px;margin-bottom:14px}
+.file-section-title{font-size:12px;font-weight:700;color:#5c6bc0;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
+.status-msg{font-size:12px;margin-top:8px;padding:7px 12px;border-radius:6px;display:none}
+.status-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.status-err{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+
+.chng-pass-box{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:14px;margin-top:12px}
+
+@media(max-width:480px){.row2{grid-template-columns:1fr}.content{padding:12px 10px}.totalamt{font-size:20px}}
+
+@media print{
+  #loginScreen,#appScreen .topbar,#appScreen .tabs,.no-print{display:none!important}
+  #printArea{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">&#127920;</div>
+    <div class="login-title">Lottery Manager</div>
+    <div class="login-sub">Secure Login — Aapka data safe hai</div>
+    <label>Username</label>
+    <input type="text" id="loginUser" placeholder="Username dalein" autocomplete="off"/>
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="Password dalein" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Login Karein</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-hint">Pehli baar? Default: admin / admin123</div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen">
+  <div class="topbar no-print">
+    <div class="topbar-title">&#127920; Lottery Manager</div>
+    <div class="topbar-right">
+      <span class="topbar-clock" id="liveClock"></span>
+      <span style="font-size:12px;opacity:0.7" id="loggedUser"></span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="tabs no-print">
+    <button class="tab active" onclick="showTab('entry')">&#9998; Entry</button>
+    <button class="tab" onclick="showTab('winner')">&#127942; Winner</button>
+    <button class="tab" onclick="showTab('history')">&#128196; History</button>
+    <button class="tab" onclick="showTab('settings')">&#9881; Settings</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ENTRY TAB -->
+    <div id="tab-entry" class="sec active">
+      <div class="card no-print">
+        <div class="card-title">Game aur Customer</div>
+        <div class="row2">
+          <div><label>Game</label>
+            <select id="gameName">
+              <option>Hyderabad</option><option>Faridabad</option><option>New Faridabad</option>
+              <option>Ghaziabad</option><option>Gali</option><option>Desawar</option>
+            </select>
+          </div>
+          <div><label>Customer Naam (optional)</label>
+            <input type="text" id="custName" placeholder="Jaise: Ramesh Kumar"/>
+          </div>
+        </div>
+      </div>
+      <div class="card no-print">
+        <div class="card-title">Numbers aur Raqam</div>
+        <div class="colheader">
+          <span>Number (00-99)</span><span>Amount (Rs.)</span><span></span>
+        </div>
+        <div id="eContainer"></div>
+        <button class="addbtn" onclick="addRow()">&#43; Aur number add karo</button>
+      </div>
+      <div class="totalbar no-print">
+        <span style="font-size:13px;opacity:0.8">Kul Raqam (Total)</span>
+        <span class="totalamt">Rs. <span id="totalAmt">0</span></span>
+      </div>
+      <div class="btnrow no-print">
+        <button class="btn btn-primary" onclick="saveEntry()">&#10003; Save &amp; Slip banao</button>
+        <button class="btn" onclick="clearForm()">&#10005; Clear</button>
+      </div>
+
+      <div id="slipArea" style="display:none">
+        <div class="slip-box" id="printArea">
+          <div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:12px;margin-bottom:12px">
+            <div id="slipGame" style="font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:3px"></div>
+            <div id="slipDT" style="font-size:12px;color:#888"></div>
+            <div id="slipCust" style="font-size:13px;font-weight:600;color:#333;margin-top:4px"></div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <thead><tr style="border-bottom:1px solid #eee">
+              <th style="text-align:left;padding:5px 8px;color:#999;font-size:12px">#</th>
+              <th style="text-align:left;padding:5px 8px;color:#999;font-size:12px">Number</th>
+              <th style="text-align:right;padding:5px 8px;color:#999;font-size:12px">Amount</th>
+            </tr></thead>
+            <tbody id="slipRows"></tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:15px;font-weight:700;border-top:1px dashed #ccc;padding-top:10px">
+            <span>TOTAL</span><span>Rs. <span id="slipTotal"></span></span>
+          </div>
+        </div>
+        <div class="btnrow no-print" style="margin-top:10px">
+          <button class="btn btn-blue" onclick="doPrint()">&#128438; Print Slip</button>
+          <button class="btn btn-wa" onclick="doWhatsApp()">&#128172; WhatsApp</button>
+          <button class="btn btn-blue" onclick="doSlipPDF()">&#128196; PDF Share</button>
+          <button class="btn" onclick="document.getElementById('slipArea').style.display='none'">Wapas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WINNER TAB -->
+    <div id="tab-winner" class="sec">
+      <div class="card">
+        <div class="card-title">&#127942; Winner Number Dalein</div>
+        <p style="font-size:13px;color:#888;margin-bottom:14px">Winning number daalo — system apne aap batayega kisne lagaya tha</p>
+        <div class="row2">
+          <div><label>Game</label>
+            <select id="winGame">
+              <option>Hyderabad</option><option>Faridabad</option><option>New Faridabad</option>
+              <option>Ghaziabad</option><option>Gali</option><option>Desawar</option>
+            </select>
+          </div>
+          <div><label>Winning Number (00-99)</label>
+            <input type="number" id="winNum" min="0" max="99" placeholder="Jaise: 47"/>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Date filter (optional — khali chodo sabhi dates)</label>
+          <input type="text" id="winDate" placeholder="Jaise: 13/06/2025"/>
+        </div>
+        <button class="btn btn-primary" onclick="findWinner()">&#128269; Dhundho</button>
+      </div>
+      <div id="winResult"></div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="sec">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:700">Saari Entries <span class="badge" id="histCount">0</span></div>
+        <button class="btn btn-red" onclick="clearHistory()" style="font-size:12px;padding:6px 12px">Sab Delete</button>
+      </div>
+      <input type="text" id="histSearch" placeholder="Game ya customer naam se dhundho..." oninput="renderHistory()" style="margin-bottom:12px"/>
+      <div id="histList"><p class="empty">Abhi koi entry nahi hai</p></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="sec">
+
+      <div class="file-section">
+        <div class="file-section-title">&#128190; Encrypted File mein Save karo</div>
+        <p style="font-size:13px;color:#666;margin-bottom:12px">Saara data ek encrypted <b>.lmdata</b> file mein save hoga — sirf is software se khulegi</p>
+        <button class="btn btn-green" onclick="saveToFile()">&#8595; Data File mein Save karo (.lmdata)</button>
+        <div id="saveStatus" class="status-msg"></div>
+      </div>
+
+      <div class="file-section">
+        <div class="file-section-title">&#128194; File se Data Load karo</div>
+        <p style="font-size:13px;color:#666;margin-bottom:12px">Pehle save ki hui <b>.lmdata</b> file se data wapas load karo</p>
+        <input type="file" id="fileInput" accept=".lmdata" style="display:none" onchange="loadFromFile()"/>
+        <button class="btn btn-orange" onclick="document.getElementById('fileInput').click()">&#8593; .lmdata File Load karo</button>
+        <div id="loadStatus" class="status-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128274; Password Badlo</div>
+        <div style="margin-bottom:10px">
+          <label>Purana Password</label>
+          <input type="password" id="oldPass" placeholder="Purana password"/>
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Naya Password</label>
+          <input type="password" id="newPass" placeholder="Naya password (kam se kam 4 characters)"/>
+        </div>
+        <div style="margin-bottom:12px">
+          <label>Naya Password Dobara</label>
+          <input type="password" id="newPass2" placeholder="Dobara dalein"/>
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">Password Badlo</button>
+        <div id="passStatus" class="status-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#8505; Software Info</div>
+        <div style="font-size:13px;color:#666;line-height:2">
+          <div>Version: 2.0 Secure</div>
+          <div>Data: Browser + Encrypted File</div>
+          <div>Encryption: AES-256-GCM</div>
+          <div id="totalEntriesInfo">Total Entries: 0</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ============ CRYPTO ============
+async function getKey(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+    keyMaterial,
+    { name:'AES-GCM', length:256 },
+    false, ['encrypt','decrypt']
+  );
+}
+
+async function encryptData(data, password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await getKey(password, salt);
+  const enc = new TextEncoder();
+  const encrypted = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, enc.encode(data));
+  const buf = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+  buf.set(salt, 0); buf.set(iv, 16); buf.set(new Uint8Array(encrypted), 28);
+  return btoa(String.fromCharCode(...buf));
+}
+
+async function decryptData(b64, password) {
+  const buf = new Uint8Array(atob(b64).split('').map(c => c.charCodeAt(0)));
+  const salt = buf.slice(0, 16);
+  const iv = buf.slice(16, 28);
+  const data = buf.slice(28);
+  const key = await getKey(password, salt);
+  const dec = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data);
+  return new TextDecoder().decode(dec);
+}
+
+// ============ AUTH ============
+function getUsers() {
+  return JSON.parse(localStorage.getItem('lm_users') || 'null') ||
+    { admin: { passHash: btoa('admin123'), displayName:'Admin' } };
+}
+function saveUsers(u) { localStorage.setItem('lm_users', JSON.stringify(u)); }
+function hashPass(p) { return btoa(unescape(encodeURIComponent(p))); }
+
+let currentUser = null;
+let currentPass = null;
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const users = getUsers();
+  if (!users[user]) { document.getElementById('loginErr').textContent = 'Username galat hai!'; return; }
+  if (users[user].passHash !== hashPass(pass)) { document.getElementById('loginErr').textContent = 'Password galat hai!'; return; }
+  currentUser = user;
+  currentPass = pass;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  document.getElementById('loggedUser').textContent = users[user].displayName || user;
+  loadData();
+  updateClock();
+  setInterval(updateClock, 1000);
+  updateInfo();
+}
+
+function doLogout() {
+  if (!confirm('Logout karna chahte ho?')) return;
+  currentUser = null; currentPass = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+}
+
+function changePassword() {
+  const old = document.getElementById('oldPass').value;
+  const n1 = document.getElementById('newPass').value;
+  const n2 = document.getElementById('newPass2').value;
+  const st = document.getElementById('passStatus');
+  if (hashPass(old) !== hashPass(currentPass)) { showStatus(st,'Purana password galat hai!','err'); return; }
+  if (n1.length < 4) { showStatus(st,'Naya password kam se kam 4 characters ka hona chahiye!','err'); return; }
+  if (n1 !== n2) { showStatus(st,'Dono passwords match nahi karte!','err'); return; }
+  const users = getUsers();
+  users[currentUser].passHash = hashPass(n1);
+  saveUsers(users);
+  currentPass = n1;
+  document.getElementById('oldPass').value='';
+  document.getElementById('newPass').value='';
+  document.getElementById('newPass2').value='';
+  showStatus(st,'Password successfully badal gaya!','ok');
+}
+
+// ============ DATA ============
+let history = [];
+let rowC = 0;
+
+function loadData() {
+  history = JSON.parse(localStorage.getItem('lm_data_' + currentUser) || '[]');
+  renderHistory();
+  document.getElementById('histCount').textContent = history.length;
+}
+
+function saveData() {
+  localStorage.setItem('lm_data_' + currentUser, JSON.stringify(history));
+  document.getElementById('histCount').textContent = history.length;
+  updateInfo();
+}
+
+function updateInfo() {
+  document.getElementById('totalEntriesInfo').textContent = 'Total Entries: ' + history.length;
+}
+
+// ============ FILE SAVE/LOAD ============
+async function saveToFile() {
+  const st = document.getElementById('saveStatus');
+  try {
+    const payload = JSON.stringify({ version:2, user:currentUser, data:history, savedAt:new Date().toISOString() });
+    const encrypted = await encryptData(payload, currentPass);
+    const blob = new Blob([encrypted], { type:'application/octet-stream' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const d = new Date();
+    a.download = 'lottery_backup_' + d.getDate() + '-' + (d.getMonth()+1) + '-' + d.getFullYear() + '.lmdata';
+    a.click();
+    showStatus(st, 'File successfully save ho gayi! Ise safe jagah rakhein.', 'ok');
+  } catch(e) {
+    showStatus(st, 'Error: File save nahi hui. ' + e.message, 'err');
+  }
+}
+
+async function loadFromFile() {
+  const st = document.getElementById('loadStatus');
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const decrypted = await decryptData(text.trim(), currentPass);
+    const parsed = JSON.parse(decrypted);
+    if (!parsed.data || !Array.isArray(parsed.data)) throw new Error('File ka format galat hai');
+    if (!confirm('File mein ' + parsed.data.length + ' entries hain. Kya current data ke saath merge karein?\n(Cancel = replace karein)')) {
+      history = parsed.data;
+    } else {
+      const existingIds = new Set(history.map(h => h.id));
+      parsed.data.forEach(e => { if (!existingIds.has(e.id)) history.push(e); });
+      history.sort((a,b) => b.id - a.id);
+    }
+    saveData();
+    renderHistory();
+    showStatus(st, parsed.data.length + ' entries load ho gayi! Saved at: ' + (parsed.savedAt||'?'), 'ok');
+  } catch(e) {
+    showStatus(st, 'Error: File open nahi hui. Password galat hai ya file kharab hai.', 'err');
+  }
+  document.getElementById('fileInput').value = '';
+}
+
+function showStatus(el, msg, type) {
+  el.textContent = msg;
+  el.className = 'status-msg ' + (type==='ok' ? 'status-ok' : 'status-err');
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display='none'; }, 5000);
+}
+
+// ============ CLOCK ============
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent =
+    now.toLocaleDateString('en-IN') + '  ' + now.toLocaleTimeString('en-IN');
+}
+
+// ============ TABS ============
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i) => {
+    b.classList.toggle('active', ['entry','winner','history','settings'][i]===t);
+  });
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='history') renderHistory();
+  if(t==='settings') updateInfo();
+}
+
+// ============ ENTRY ============
+function addRow(n='',a=''){
+  rowC++;
+  const id=rowC;
+  const d=document.createElement('div');
+  d.className='erow';d.id='row-'+id;
+  d.innerHTML=`<input type="number" min="0" max="99" placeholder="00-99" value="${n}" id="n-${id}" oninput="calcTotal()" style="text-align:center"/>
+  <input type="number" min="0" placeholder="Rs." value="${a}" id="a-${id}" oninput="calcTotal()"/>
+  <button class="rbtn" onclick="removeRow(${id})">&#215;</button>`;
+  document.getElementById('eContainer').appendChild(d);
+  calcTotal();
+}
+function removeRow(id){const el=document.getElementById('row-'+id);if(el)el.remove();calcTotal();}
+function calcTotal(){
+  let t=0;
+  document.querySelectorAll('[id^="a-"]').forEach(el=>{const v=parseFloat(el.value);if(!isNaN(v))t+=v;});
+  document.getElementById('totalAmt').textContent=Math.round(t);
+}
+function getRows(){
+  const rows=[];
+  document.querySelectorAll('[id^="n-"]').forEach(el=>{
+    const idx=el.id.split('-')[1];
+    const num=el.value.trim();
+    const amtEl=document.getElementById('a-'+idx);
+    if(!amtEl)return;
+    const amt=amtEl.value;
+    if(num!==''&&amt!==''){
+      const n=parseInt(num);
+      if(!isNaN(n)&&n>=0&&n<=99&&parseFloat(amt)>0)
+        rows.push({number:String(n).padStart(2,'0'),amount:parseFloat(amt)});
+    }
+  });
+  return rows;
+}
+function saveEntry(){
+  const rows=getRows();
+  if(!rows.length){alert('Pehle numbers aur amounts daalen!');return;}
+  const game=document.getElementById('gameName').value;
+  const cust=document.getElementById('custName').value.trim()||'';
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const timeStr=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const total=rows.reduce((s,r)=>s+r.amount,0);
+  const entry={id:Date.now(),game,cust,date:dateStr,time:timeStr,rows,total};
+  history.unshift(entry);
+  saveData();
+  renderSlip(entry);
+  document.getElementById('slipArea').style.display='block';
+  document.getElementById('slipArea').scrollIntoView({behavior:'smooth'});
+}
+function renderSlip(e){
+  document.getElementById('slipGame').textContent=e.game;
+  document.getElementById('slipDT').textContent='Date: '+e.date+'     Time: '+e.time;
+  document.getElementById('slipCust').textContent=e.cust?'Customer: '+e.cust:'';
+  const tb=document.getElementById('slipRows');tb.innerHTML='';
+  e.rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.style.background=i%2===0?'#f9f9f9':'#fff';
+    tr.innerHTML=`<td style="padding:6px 8px;color:#aaa">${i+1}</td>
+    <td style="padding:6px 8px;font-weight:700;font-size:17px;color:#1a1a2e">${r.number}</td>
+    <td style="padding:6px 8px;text-align:right">Rs. ${Math.round(r.amount)}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('slipTotal').textContent=Math.round(e.total);
+}
+function clearForm(){
+  document.getElementById('eContainer').innerHTML='';
+  document.getElementById('custName').value='';
+  document.getElementById('totalAmt').textContent='0';
+  rowC=0;addRow();
+  document.getElementById('slipArea').style.display='none';
+}
+function doPrint(){window.print();}
+function doWhatsApp(){
+  const game=document.getElementById('slipGame').textContent;
+  const dt=document.getElementById('slipDT').textContent;
+  const cust=document.getElementById('slipCust').textContent;
+  let msg='*'+game+'*\n'+dt;
+  if(cust)msg+='\n'+cust;
+  msg+='\n\n*No.*  |  *Amount*\n--------------------\n';
+  document.querySelectorAll('#slipRows tr').forEach(tr=>{
+    const tds=tr.querySelectorAll('td');
+    if(tds.length>=3)msg+=tds[1].textContent.trim()+'  ->  Rs.'+tds[2].textContent.replace('Rs.','').trim()+'\n';
+  });
+  msg+='--------------------\n*Total: Rs.'+document.getElementById('slipTotal').textContent+'*';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function doSlipPDF(){
+  if(!window.jspdf){ alert('PDF library load nahi hui. Internet connection check karein.'); return; }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const game=document.getElementById('slipGame').textContent;
+  const dt=document.getElementById('slipDT').textContent;
+  const cust=document.getElementById('slipCust').textContent;
+  let y=15;
+  doc.setFontSize(16);doc.setFont(undefined,'bold');
+  doc.text(game,14,y); y+=8;
+  doc.setFontSize(11);doc.setFont(undefined,'normal');
+  doc.text(dt,14,y); y+=6;
+  if(cust){ doc.text(cust,14,y); y+=6; }
+  y+=4;
+  document.querySelectorAll('#slipRows tr').forEach(tr=>{
+    const tds=tr.querySelectorAll('td');
+    if(tds.length>=3){
+      doc.text(tds[1].textContent.trim()+'   ->   Rs. '+tds[2].textContent.replace('Rs.','').trim(),20,y);
+      y+=6;
+    }
+  });
+  y+=4;
+  doc.setFont(undefined,'bold');doc.setFontSize(13);
+  doc.text('TOTAL: Rs. '+document.getElementById('slipTotal').textContent,14,y);
+  const fname='lottery_slip_'+Date.now()+'.pdf';
+  const blob=doc.output('blob');
+  sharePDFBlob(blob, fname, 'Lottery Slip', game+' - '+dt);
+}
+
+// Universal PDF share helper.
+// 1) Agar Android wrapper app ke andar chal rahe ho (window.AndroidApp.sharePDF available),
+//    toh PDF base64 me native app ko bhejo — wahan WhatsApp / WhatsApp Business chooser khulega.
+// 2) Warna browser ke Web Share API try karo (mobile par WhatsApp bhi options me aayega).
+// 3) Warna seedha download kar do.
+function sharePDFBlob(blob, fname, title, text){
+  if(window.AndroidApp && typeof window.AndroidApp.sharePDF === 'function'){
+    const reader=new FileReader();
+    reader.onload=function(){
+      const base64 = reader.result.split(',')[1];
+      window.AndroidApp.sharePDF(base64, fname);
+    };
+    reader.readAsDataURL(blob);
+    return;
+  }
+  const file=new File([blob],fname,{type:'application/pdf'});
+  if(navigator.canShare && (() => { try { return navigator.canShare({files:[file]}); } catch(e){ return false; } })()){
+    navigator.share({files:[file],title:title||'Lottery Report',text:text||''}).catch(()=>{ downloadBlob(blob,fname); });
+  } else {
+    downloadBlob(blob,fname);
+  }
+}
+function downloadBlob(blob,fname){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=fname;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+
+// ============ WINNER ============
+function findWinner(){
+  const game=document.getElementById('winGame').value;
+  const numRaw=document.getElementById('winNum').value.trim();
+  const dateFilter=document.getElementById('winDate').value.trim();
+  const res=document.getElementById('winResult');
+  if(numRaw===''){res.innerHTML='<div class="win-result win-none" style="font-size:13px">Winning number daalen pehle.</div>';return;}
+  const winNum=String(parseInt(numRaw)).padStart(2,'0');
+  const found=[];
+  history.forEach(e=>{
+    if(e.game!==game)return;
+    if(dateFilter&&e.date!==dateFilter)return;
+    e.rows.forEach(r=>{
+      if(r.number===winNum)found.push({cust:e.cust||'Anonymous',date:e.date,time:e.time,amount:r.amount});
+    });
+  });
+  if(!found.length){
+    res.innerHTML=`<div class="win-result win-none">
+      <div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:4px">Koi winner nahi mila</div>
+      <div style="font-size:13px;color:#888">${game} mein number <b>${winNum}</b> kisi ne nahi lagaya${dateFilter?' is date ko':''}.</div>
+    </div>`;return;
+  }
+  let html=`<div class="win-result win-found">
+    <div style="font-size:14px;font-weight:700;color:#2e7d32;margin-bottom:10px">
+      &#127942; ${found.length} Winner${found.length>1?'s':''} mile! &mdash; ${game} &mdash; Number: <span style="font-size:20px">${winNum}</span>
+    </div>`;
+  found.forEach(f=>{
+    html+=`<div class="win-row">
+      <div><span style="font-weight:700;font-size:14px">${f.cust}</span><br>
+      <span style="font-size:11px;color:#888">${f.date} ${f.time}</span></div>
+      <div style="font-weight:700;font-size:15px;color:#2e7d32">Rs. ${Math.round(f.amount)}</div>
+    </div>`;
+  });
+  const tot=found.reduce((s,f)=>s+f.amount,0);
+  html+=`<div style="text-align:right;font-size:13px;color:#777;margin-top:8px;padding-top:8px;border-top:1px dashed #a5d6a7">
+    Kul jeeti raqam: <b style="color:#2e7d32">Rs. ${Math.round(tot)}</b></div></div>`;
+  res.innerHTML=html;
+}
+
+// ============ HISTORY ============
+// "Business day" chalta hai subah 6:00 AM se agle din subah 6:00 AM tak.
+// Entry ka business-day us entry ke id (timestamp) se nikalte hain — locale string par depend nahi karna padta.
+function getBusinessDay(entry){
+  const d=new Date(entry.id);
+  const bd=new Date(d);
+  if(d.getHours()<6) bd.setDate(bd.getDate()-1);
+  bd.setHours(0,0,0,0);
+  return bd;
+}
+function fmtDate(d){
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+let dayGroups={};
+
+function renderHistory(){
+  const search=(document.getElementById('histSearch')?.value||'').toLowerCase();
+  const filtered=history.filter(h=>
+    h.game.toLowerCase().includes(search)||(h.cust&&h.cust.toLowerCase().includes(search))
+  );
+  document.getElementById('histCount').textContent=history.length;
+  const list=document.getElementById('histList');
+  if(!filtered.length){list.innerHTML='<p class="empty">Koi entry nahi mili</p>';dayGroups={};return;}
+
+  // Group entries by business day (6AM - 6AM)
+  dayGroups={};
+  filtered.forEach(h=>{
+    const bd=getBusinessDay(h);
+    const key=bd.getTime();
+    if(!dayGroups[key]) dayGroups[key]={bd,entries:[],total:0};
+    dayGroups[key].entries.push(h);
+    dayGroups[key].total+=h.total;
+  });
+
+  const keys=Object.keys(dayGroups).map(Number).sort((a,b)=>b-a);
+  list.innerHTML='';
+
+  keys.forEach(key=>{
+    const g=dayGroups[key];
+    const nextBd=new Date(g.bd);nextBd.setDate(nextBd.getDate()+1);
+
+    const groupDiv=document.createElement('div');groupDiv.className='hist-group';
+
+    const header=document.createElement('div');header.className='hist-group-header';
+    header.innerHTML=`<div>
+        <div class="hist-group-date">&#128197; ${fmtDate(g.bd)}</div>
+        <div class="hist-group-range">6:00 AM (${fmtDate(g.bd)}) se 6:00 AM (${fmtDate(nextBd)}) tak &bull; ${g.entries.length} entries</div>
+      </div>
+      <div class="hist-group-total">Kul: Rs. ${Math.round(g.total)}</div>`;
+    groupDiv.appendChild(header);
+
+    const btnRow=document.createElement('div');btnRow.className='hist-group-btns';
+    btnRow.innerHTML=`<button class="btn btn-wa" onclick="event.stopPropagation();shareDayWhatsApp(${key})">&#128172; WhatsApp Text</button>
+      <button class="btn btn-blue" onclick="event.stopPropagation();shareDayPDF(${key})">&#128196; PDF Share</button>`;
+    groupDiv.appendChild(btnRow);
+
+    const entriesWrap=document.createElement('div');entriesWrap.className='hist-group-entries';
+    g.entries.forEach(h=>{
+      const d=document.createElement('div');d.className='hist-item';
+      d.innerHTML=`<div>
+        <span style="font-weight:700;font-size:14px">${h.game}</span>${h.cust?' &mdash; '+h.cust:''}
+        <br><span style="color:#bbb;font-size:12px">${h.date} ${h.time} &bull; ${h.rows.length} numbers</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-weight:700;font-size:15px;color:#1a1a2e">Rs. ${Math.round(h.total)}</span>
+        <button onclick="event.stopPropagation();deleteEntry(${h.id})" style="border:1px solid #eee;background:#fff;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:12px;color:#e94560">Del</button>
+      </div>`;
+      d.onclick=()=>{renderSlip(h);document.getElementById('slipArea').style.display='block';showTab('entry');setTimeout(()=>document.getElementById('slipArea').scrollIntoView({behavior:'smooth'}),100);};
+      entriesWrap.appendChild(d);
+    });
+    groupDiv.appendChild(entriesWrap);
+
+    list.appendChild(groupDiv);
+  });
+}
+
+// Build a WhatsApp-friendly text report for one business day
+function buildDayText(g){
+  const nextBd=new Date(g.bd);nextBd.setDate(nextBd.getDate()+1);
+  let msg='*Lottery Manager — Daily Report*\n';
+  msg+=fmtDate(g.bd)+' (6:00 AM)  to  '+fmtDate(nextBd)+' (6:00 AM)\n';
+  msg+='====================\n\n';
+  g.entries.slice().reverse().forEach(e=>{
+    msg+='*'+e.game+'*'+(e.cust?' — '+e.cust:'')+'  ['+e.time+']\n';
+    e.rows.forEach(r=>{ msg+=r.number+'  ->  Rs.'+Math.round(r.amount)+'\n'; });
+    msg+='Subtotal: Rs.'+Math.round(e.total)+'\n\n';
+  });
+  msg+='====================\n*GRAND TOTAL: Rs.'+Math.round(g.total)+'*';
+  return msg;
+}
+
+// Share button 1: WhatsApp text message
+function shareDayWhatsApp(key){
+  const g=dayGroups[key];
+  if(!g)return;
+  const msg=buildDayText(g);
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// Share button 2: PDF (opens device share sheet on mobile incl. WhatsApp, else downloads)
+function shareDayPDF(key){
+  const g=dayGroups[key];
+  if(!g)return;
+  if(!window.jspdf){ alert('PDF library load nahi hui. Internet connection check karein.'); return; }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const nextBd=new Date(g.bd);nextBd.setDate(nextBd.getDate()+1);
+  const pageH=doc.internal.pageSize.getHeight();
+  let y=15;
+
+  doc.setFontSize(16);doc.setFont(undefined,'bold');
+  doc.text('Lottery Manager - Daily Report',14,y); y+=8;
+  doc.setFontSize(11);doc.setFont(undefined,'normal');
+  doc.text('Date: '+fmtDate(g.bd)+' (6:00 AM)  to  '+fmtDate(nextBd)+' (6:00 AM)',14,y); y+=10;
+
+  g.entries.slice().reverse().forEach(e=>{
+    if(y>pageH-20){doc.addPage();y=15;}
+    doc.setFont(undefined,'bold');
+    doc.text(e.game+(e.cust?' - '+e.cust:'')+'  ['+e.time+']',14,y); y+=6;
+    doc.setFont(undefined,'normal');
+    e.rows.forEach(r=>{
+      if(y>pageH-20){doc.addPage();y=15;}
+      doc.text(r.number+'   ->   Rs. '+Math.round(r.amount),20,y); y+=5.5;
+    });
+    doc.text('Subtotal: Rs. '+Math.round(e.total),20,y); y+=8;
+  });
+
+  if(y>pageH-20){doc.addPage();y=15;}
+  doc.setFont(undefined,'bold');doc.setFontSize(13);
+  doc.text('GRAND TOTAL: Rs. '+Math.round(g.total),14,y+4);
+
+  const fname='lottery_report_'+fmtDate(g.bd).replace(/\//g,'-')+'.pdf';
+  const blob=doc.output('blob');
+  sharePDFBlob(blob, fname, 'Lottery Report', 'Lottery Report - '+fmtDate(g.bd));
+}
+function deleteEntry(id){
+  if(!confirm('Yeh entry delete karein?'))return;
+  history=history.filter(h=>h.id!==id);
+  saveData();renderHistory();
+}
+function clearHistory(){
+  if(!confirm('Saari entries permanently delete ho jayengi. Pakka?'))return;
+  history=[];saveData();renderHistory();
+}
+
+addRow();
+</script>
+</body>
+</html>
